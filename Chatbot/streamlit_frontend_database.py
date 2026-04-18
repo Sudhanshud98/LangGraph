@@ -1,8 +1,10 @@
 from numpy import add
 import streamlit as st
-from langgraph_database_backend import workflow, retrieve_all_threads
-from langchain_core.messages import HumanMessage
+from langgraph_tool_backend import workflow, retrieve_all_threads
+from langchain_core.messages import HumanMessage, AIMessage
 import uuid
+
+st.title("🤖 My Multi-Utility Chatbot")
 
 # Utility Functions
 
@@ -39,7 +41,7 @@ add_thread(st.session_state['thread_id'])
 
 # Sidebar UI
 
-st.sidebar.title('Demo Chatbot')
+# st.sidebar.title('Demo Chatbot')
 
 if st.sidebar.button('New Chat'):
     reset_chat()
@@ -83,13 +85,15 @@ if user_input:
             }
 
     with st.chat_message('assistant'):
-        ai_message = st.write_stream(
-            message_chunk.content for message_chunk, metadata in workflow.stream(
+        def ai_only_stream():
+            for message_chunk, metadata in workflow.stream(
                 {'messages': [HumanMessage(content = user_input)]},
                 config = CONFIG,
                 stream_mode = 'messages'
-            )
-        )
+            ):
+                if isinstance(message_chunk, AIMessage):
+                    yield message_chunk.content
+
+        ai_message = st.write_stream(ai_only_stream())
 
     st.session_state['message_history'].append({'role' : 'assistant', 'content' : ai_message})
-
