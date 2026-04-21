@@ -101,4 +101,4 @@ app = builder.compile()
 
 # print(Image(app.get_graph().draw_mermaid_png()))
 
-print(app.invoke({'topic' : 'Write a blog on Self Attention', 'sections' : []}))
+print()
