@@ -93,7 +93,7 @@ class State(TypedDict):
     plan: Optional[Plan]
 
     as_of : str
-    recency_days = int
+    recency_days : int
 
     # workers
     sections: Annotated[List[tuple[int, str]], operator.add]  # (task_id, section_md)
@@ -304,6 +304,8 @@ def fanout(state: State):
                 "task": task.model_dump(),
                 "topic": state["topic"],
                 "mode": state["mode"],
+                "as_of": state["as_of"],
+                "recency_days": state["recency_days"],
                 "plan": state["plan"].model_dump(),
                 "evidence": [e.model_dump() for e in state.get("evidence", [])],
             },
@@ -372,6 +374,7 @@ def worker(payload: dict) -> dict:
                     f"Constraints: {plan.constraints}\n"
                     f"Topic: {topic}\n"
                     f"Mode: {mode}\n\n"
+                    f"As-of: {payload.get('as_of')} (recency_days={payload.get('recency_days')})\n\n"
                     f"Section title: {task.title}\n"
                     f"Goal: {task.goal}\n"
                     f"Target words: {task.target_words}\n"
